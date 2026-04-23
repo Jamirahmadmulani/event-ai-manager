@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+     <a href="javascript:history.back()" class="btn btn-secondary mb-3">
+        Go Back
+    </a>
+    <h3> AI Chatbot</h3>
+
+    <div id="chat-box" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="message" class="form-control" placeholder="Ask something...">
+        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+function sendMessage() {
+    let msg = document.getElementById("message").value;
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({message: msg})
+    })
+    .then(res => res.json())
+    .then(data => {
+        let box = document.getElementById("chat-box");
+
+        box.innerHTML += "<div><b>You:</b> " + msg + "</div>";
+        box.innerHTML += "<div><b>AI:</b> " + data.response + "</div><hr>";
+
+        document.getElementById("message").value = "";
+        box.scrollTop = box.scrollHeight;
+    });
+}
+</script>
+
+{% endblock %}
