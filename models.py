@@ -16,7 +16,7 @@ class Event(db.Model):
     date = db.Column(db.String(20), nullable=False)
     location = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)   
-    category_name = db.Column(db.String(50)) 
+    
 
 
     
