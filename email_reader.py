@@ -15,8 +15,7 @@ MAIL_USER = "jamirahmadmulani8@gmail.com"
 MAIL_PASS = "nqdauwwjnnmzxygu"
 GEMINI_API_KEY = "" 
 
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-flash-latest")
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 def clean_email(msg):
     body = ""
@@ -60,7 +59,10 @@ def extract_data_with_gemini(subject, body):
     """
     
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+           model="gemini-flash-latest",
+           contents=prompt
+        )
         json_text = response.text.replace('```json', '').replace('```', '').strip()
         return json.loads(json_text)
     except Exception as e:
