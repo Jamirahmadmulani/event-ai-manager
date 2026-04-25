@@ -331,19 +331,21 @@ scheduler = APScheduler()
 def auto_read_mails():
     with app.app_context():
         print(" Auto email sync running...")
-        user = User.query.all()
-        for user in user:
-              read_email_replies(app, user.id)
+        users=User.query.all()
+        for user in users:
+             read_email_replies(app, user.id)
 
 def start_scheduler(app):
     scheduler.init_app(app)
 
     scheduler.add_job(
-        id="email_job",
-        func=auto_read_mails,
-        trigger="interval",
-        minutes=2
-    )
+    id="email_job",
+    func=auto_read_mails,
+    trigger="interval",
+    minutes=5,
+    max_instances=1,
+    coalesce=True
+)
 
     scheduler.start()
 
