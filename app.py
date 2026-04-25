@@ -345,7 +345,7 @@ def start_scheduler(app):
         minutes=2
     )
 
-    scheduler.start()
+   # scheduler.start()
 
 
 
