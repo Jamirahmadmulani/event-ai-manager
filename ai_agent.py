@@ -11,7 +11,7 @@ load_dotenv()
 #  GEMINI CLIENT
 
 client = genai.Client(
-    api_key=os.getenv("AIzaSyCKY8imAxsGEbAUaL468AL_xkB4EUSNmNM")   
+    api_key=os.getenv("GEMINI_API_KEY")   
 )
 
 #  WORKING MODEL
