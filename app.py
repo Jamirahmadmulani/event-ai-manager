@@ -11,18 +11,44 @@ from flask_apscheduler import APScheduler
 
 from flask_mail import Mail, Message
 from ai_agent import graph   
-
+scheduler = APScheduler()
 app = Flask(__name__)
 app.config.from_object(Config)
 mail = Mail()
 mail.init_app(app)
 db.init_app(app)
 
-# 🔥 MAIL INIT (ADD)
+
+def auto_read_mails():
+    with app.app_context():
+        print(" Auto email sync running...")
+        users=User.query.all()
+        for user in users:
+             read_email_replies(app, user.id)
+
+def start_scheduler(app):
+    scheduler.init_app(app)
+
+    scheduler.add_job(
+    id="email_job",
+    func=auto_read_mails,
+    trigger="interval",
+    minutes=1,
+    max_instances=1,
+    coalesce=True
+)
+
+    scheduler.start()
+
+
+start_scheduler(app)
+
+#  MAIL INIT (ADD)
 BASE_URL = "http://127.0.0.1:5000"
 
 with app.app_context():
     db.create_all()
+
 
 
 def login_required():
@@ -325,33 +351,6 @@ def read_mails():
     return render_template("sync_results.html", results=results)
 
 
-
-scheduler = APScheduler()
-
-def auto_read_mails():
-    with app.app_context():
-        print(" Auto email sync running...")
-        users=User.query.all()
-        for user in users:
-             read_email_replies(app, user.id)
-
-def start_scheduler(app):
-    scheduler.init_app(app)
-
-    scheduler.add_job(
-    id="email_job",
-    func=auto_read_mails,
-    trigger="interval",
-    minutes=5,
-    max_instances=1,
-    coalesce=True
-)
-
-    scheduler.start()
-
-
-
-
 @app.route("/logout")
 def logout():
     session.clear()
@@ -425,6 +424,5 @@ def event_history():
     return render_template("event_history.html", logs=logs)
 
 
-if __name__ == "__main__":
-    start_scheduler(app)
+if __name__ == "__main__": 
     app.run(debug=True)   

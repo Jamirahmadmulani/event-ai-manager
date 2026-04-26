@@ -136,10 +136,21 @@ def read_email_replies(app, user_id):
                 if data.get("location") and data["location"] != "null":
                     event.location = data["location"]
                     changes.append("Location") # Added tracking
-                if data.get("description") and data["description"] != "null":
-                    event.description = data["description"]
-                    changes.append("Description") # Added tracking
+                desc = data.get("description")
 
+
+                if desc and str(desc).strip().lower() != "null":                      
+                    event.description = desc.strip()
+                    changes.append("Description")
+
+
+                elif body and body.strip():
+
+                    event.description = body.strip()
+                    changes.append("Description (auto)")
+                    
+                    
+                
                 # Date Format Fix
                 if data.get("date"):
                     try:
@@ -157,7 +168,7 @@ def read_email_replies(app, user_id):
                     location=event.location,
                     description=event.description,
                     date=event.date,
-                    fields_changed=", ".join(changes) if changes else "Details Updated"
+                    fields_changed=", ".join(changes) 
                     
                 )
                 db.session.add(log)
