@@ -17,23 +17,60 @@ GEMINI_API_KEY = ""
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+
+
 def clean_email(msg):
     body = ""
+
     try:
         if msg.is_multipart():
             for part in msg.walk():
                 content_type = part.get_content_type()
-                if content_type == "text/plain":
-                    body += part.get_payload(decode=True).decode(errors="ignore")
-                elif content_type == "text/html":
-                    html = part.get_payload(decode=True).decode(errors="ignore")
-                    body += BeautifulSoup(html, "html.parser").get_text()
-        else:
-            body = msg.get_payload(decode=True).decode(errors="ignore")
-    except:
-        pass
-    return body.strip()
+                content_disposition = str(part.get("Content-Disposition"))
 
+                # skip attachments
+                if "attachment" in content_disposition:
+                    continue
+
+                payload = part.get_payload(decode=True)
+
+                if not payload:
+                    continue
+
+                text = payload.decode(errors="ignore")
+
+                if content_type == "text/plain":
+                    body += text
+
+                elif content_type == "text/html":
+                    soup = BeautifulSoup(text, "html.parser")
+                    body += soup.get_text(separator="\n")
+
+        else:
+            payload = msg.get_payload(decode=True)
+            if payload:
+                body = payload.decode(errors="ignore")
+
+        # 🔥 REMOVE QUOTED EMAIL THREAD (IMPORTANT FIX)
+        split_markers = [
+            "On ", 
+            "wrote:", 
+            "From:", 
+            "Sent:", 
+            "Subject:"
+        ]
+
+        for marker in split_markers:
+            if marker in body:
+                body = body.split(marker)[0]
+
+        # cleanup extra spaces
+        body = body.strip()
+
+    except Exception as e:
+        print("Email parsing error:", e)
+
+    return body
 
 def extract_data_with_gemini(subject, body):
     prompt = f"""
