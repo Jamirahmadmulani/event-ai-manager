@@ -147,7 +147,7 @@ def read_email_replies(app, user_id):
                 elif body and body.strip():
 
                     event.description = body.strip()
-                    changes.append("Description (auto)")
+                    changes.append("Description ")
                     
                     
                 
